@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tip of the Day</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #2d2d2d;
+    overflow: hidden;
+  }
+
+  .tip-card {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
+    height: 100%;
+    background: #2d2d2d;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .card-header {
+    background: #2a6e4e;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .card-header h2 {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .view-all-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: inherit;
+  }
+  .view-all-btn:hover { background: rgba(255,255,255,0.25); }
+
+  .card-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .tip-app {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #2d2d2d;
+    background: #5ec48d;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+    align-self: flex-start;
+  }
+
+  .tip-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #e0e0e0;
+    font-weight: 400;
+  }
+
+  .tip-text code {
+    background: #3a3a3a;
+    color: #5ec48d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+  }
+
+  .card-footer {
+    padding: 0 20px 12px;
+    flex-shrink: 0;
+  }
+
+  .tip-counter {
+    font-size: 11px;
+    color: #777;
+    text-align: right;
+  }
+
+  /* ===== VIEW ALL OVERLAY ===== */
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #2d2d2d;
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+  }
+
+  .overlay.open { display: flex; }
+
+  .overlay-header {
+    background: #2a6e4e;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .overlay-header h2 {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .close-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: inherit;
+  }
+  .close-btn:hover { background: rgba(255,255,255,0.25); }
+
+  .overlay-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+
+  .overlay-body::-webkit-scrollbar { width: 6px; }
+  .overlay-body::-webkit-scrollbar-track { background: #333; }
+  .overlay-body::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+
+  .all-tip {
+    padding: 14px 0;
+    border-bottom: 1px solid #3a3a3a;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .all-tip:last-child { border-bottom: none; }
+
+  .all-tip-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #5ec48d;
+    min-width: 22px;
+    text-align: right;
+    padding-top: 2px;
+  }
+
+  .all-tip-body {
+    flex: 1;
+  }
+
+  .all-tip-app {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    color: #2d2d2d;
+    background: #5ec48d;
+    padding: 2px 6px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 6px;
+  }
+
+  .all-tip-text {
+    font-size: 13px;
+    line-height: 1.55;
+    color: #e0e0e0;
+  }
+
+  .all-tip-text code {
+    background: #3a3a3a;
+    color: #5ec48d;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+  }
+
+  .today-marker {
+    background: rgba(94, 196, 141, 0.1);
+    border-radius: 6px;
+    margin: 0 -8px;
+    padding: 14px 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tip-card">
+
+  <!-- MAIN VIEW -->
+  <div class="card-header">
+    <h2>Tip of the Day</h2>
+    <button class="view-all-btn" onclick="toggleOverlay()">View All</button>
+  </div>
+  <div class="card-body">
+    <div class="tip-app" id="tipApp"></div>
+    <div class="tip-text" id="tipText"></div>
+  </div>
+  <div class="card-footer">
+    <div class="tip-counter" id="tipCounter"></div>
+  </div>
+
+  <!-- VIEW ALL OVERLAY -->
+  <div class="overlay" id="overlay">
+    <div class="overlay-header">
+      <h2>All Tips</h2>
+      <button class="close-btn" onclick="toggleOverlay()">&#10005; Close</button>
+    </div>
+    <div class="overlay-body" id="allTips"></div>
+  </div>
+
+</div>
+
+<script>
+  /*
+   * ===== ADD TIPS HERE =====
+   * Each tip: { app: "App Name", text: "Tip text (HTML allowed for <code> tags)" }
+   * One tip shows per calendar day, cycling through the list.
+   */
+  const tips = [
+    {
+      app: "Outlook",
+      text: "You can drag an email directly into your <code>Calendar</code> to create a meeting with the email body pre-filled \u2014 saves retyping context."
+    },
+    {
+      app: "Outlook",
+      text: "Schedule Send lets you write an email now and send it later. Hit the dropdown arrow next to Send and pick <code>Schedule Send</code> \u2014 great for not pinging people at 11pm."
+    },
+    {
+      app: "Teams",
+      text: "Type <code>/files</code> in the search bar to see your recent files across all channels \u2014 much faster than hunting through channel tabs."
+    },
+    {
+      app: "Teams",
+      text: "Loop Components let you create a shared table, checklist, or note that everyone in the chat can edit live. Click the Loop icon below the message box \u2014 it\u2019s like a mini shared doc without leaving the conversation."
+    },
+    {
+      app: "Bluebeam",
+      text: "<code>Ctrl + Shift + F</code> searches across multiple open PDFs simultaneously \u2014 useful when hunting for a spec reference across a document set (e.g. open B31.3, B16.9, and MSS SP-75 for a question about a wrought elbow)."
+    },
+    {
+      app: "Bluebeam",
+      text: "If a document doesn\u2019t have searchable or highlightable text, go to <code>Document \u2192 OCR</code> to make it readable. Saves you from squinting at scanned PDFs."
+    },
+    {
+      app: "Windows",
+      text: "<code>Win + V</code> opens clipboard history \u2014 it shows the last ~25 things you copied and you can paste any of them. Turn it on once and never lose a copied snippet again."
+    },
+    {
+      app: "Windows",
+      text: "<code>Ctrl + Shift + V</code> pastes without formatting in most apps. In Excel, <code>Ctrl + Alt + V</code> opens Paste Special where you can paste just values, formulas, or formatting separately."
+    },
+    {
+      app: "Windows",
+      text: "Install <code>PowerToys</code> (free from Microsoft) for efficiency gains: FancyZones for custom window layouts, <code>Alt + Space</code> for a quick launcher, and Text Extractor (<code>Win + Shift + T</code>) to OCR anything on screen."
+    },
+    {
+      app: "Claude AI",
+      text: "Go to <code>Settings \u2192 Profile</code> and write a short bio about yourself \u2014 your role, what you work on, what tools you use. This gives Claude context so it tailors answers to your experience level and avoids hallucinating irrelevant info."
+    },
+  ];
+
+  // Day-of-year calculation for daily rotation
+  function dayOfYear() {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), 0, 0);
+    const diff = now - start;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+  }
+
+  const todayIndex = dayOfYear() % tips.length;
+  const todayTip = tips[todayIndex];
+
+  // Show today's tip
+  document.getElementById('tipApp').textContent = todayTip.app;
+  document.getElementById('tipText').innerHTML = todayTip.text;
+  document.getElementById('tipCounter').textContent = 'Tip ' + (todayIndex + 1) + ' of ' + tips.length;
+
+  // Build the "View All" list
+  const allContainer = document.getElementById('allTips');
+  tips.forEach((tip, i) => {
+    const row = document.createElement('div');
+    row.className = 'all-tip' + (i === todayIndex ? ' today-marker' : '');
+    row.innerHTML =
+      '<div class="all-tip-num">' + (i + 1) + '</div>' +
+      '<div class="all-tip-body">' +
+        '<div class="all-tip-app">' + tip.app + '</div>' +
+        '<div class="all-tip-text">' + tip.text + '</div>' +
+      '</div>';
+    allContainer.appendChild(row);
+  });
+
+  // Overlay toggle
+  function toggleOverlay() {
+    document.getElementById('overlay').classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>

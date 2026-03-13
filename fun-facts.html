@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Fun Facts</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: #2d2d2d;
+    overflow: hidden;
+  }
+
+  .fun-fact-card {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
+    height: 100%;
+    background: #2d2d2d;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    background: #2a6e4e;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .card-header h2 {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .shuffle-btn {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: inherit;
+  }
+  .shuffle-btn:hover { background: rgba(255,255,255,0.25); }
+
+  .card-body {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-body.fading { opacity: 0; }
+
+  .fact-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #5ec48d;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 10px;
+  }
+
+  .fact-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #e0e0e0;
+    font-weight: 400;
+  }
+
+  .card-footer {
+    padding: 0 20px 14px;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #555;
+    transition: background 0.3s;
+  }
+  .dot.active { background: #5ec48d; }
+</style>
+</head>
+<body>
+
+<div class="fun-fact-card">
+  <div class="card-header">
+    <h2>Did You Know?</h2>
+    <button class="shuffle-btn" onclick="shuffle()">Shuffle &#8635;</button>
+  </div>
+  <div class="card-body" id="cardBody">
+    <div class="fact-name" id="factName"></div>
+    <div class="fact-text" id="factText"></div>
+  </div>
+  <div class="card-footer" id="dots"></div>
+</div>
+
+<script>
+  /*
+   * ===== ADD NEW TEAM MEMBERS HERE =====
+   * Each object: { name: "First Name", facts: ["fact1", "fact2", ...] }
+   */
+  const teamMembers = [
+    {
+      name: "Linus",
+      facts: [
+        "A Colorado School of Mines grad originally from McLean, Virginia \u2014 his favorite place he\u2019s ever traveled is Lofoten, Norway.",
+        "He has a family dog named Dewey, named neither after the failed presidential candidate nor the decimal system.",
+        "Outside of work, you can find him canoeing, scrolling NYT Cooking shorts, or aura farming in coffee shops.",
+        "He holds an impressive Mario Kart Wii record and a fluency with Delta BOMs \u2014 both built on pure instinct.",
+        "Given extra time, he\u2019d judge the architectural aesthetic of whatever neighborhood he\u2019s in \u2014 without producing any better ideas."
+      ]
+    },
+    {
+      name: "Kathryn",
+      facts: [
+        "A proud Texan and Texas A&M ME grad \u2014 married to a fellow Aggie engineer, with loyalty that has survived more heartbreaking seasons than she cares to count.",
+        "She juggles three kids and a Shih-poo named Livi, all while maintaining an impressive laser tag record built on zero formal training.",
+        "In her free time, you\u2019ll find her playing Mahjong, planning vacations, or eating Nutella straight from the jar.",
+        "Best advice she\u2019s received: \u201CIf you chase the experience, the opportunities will follow.\u201D",
+        "A straight-line strategist whose instinct and focus is either very impressive or slightly alarming, depending on which side you\u2019re on."
+      ]
+    },
+    {
+      name: "Sydney",
+      facts: [
+        "A Mines grad and proud Golden, CO native \u2014 she didn\u2019t go far, but when home is that good, why would you?",
+        "Over 10 years in Oil & Gas and strangely good at Excel \u2014 finding efficiencies is basically her sport.",
+        "A big Avalanche fan who spends free time outdoors, at the hockey rink, or baking \u2014 which she considers a love language.",
+        "She and her husband Levente have two kids, Finian and Lainey, and a dog named Mikko.",
+        "Best advice she\u2019s received: know what you don\u2019t know."
+      ]
+    },
+    {
+      name: "Matthew",
+      facts: [
+        "Grew up on a family farm in Kersey, CO and played football at Colorado Mesa \u2014 he still closely follows THE Ohio State Buckeyes.",
+        "Favorite destination: Florence, Italy. Go-to in the kitchen: homemade pasta from scratch.",
+        "Into hunting, beekeeping, and sporting events \u2014 carrying a vast amount of random sports knowledge built without formal training.",
+        "Known around the office for staying calm when things get hectic \u2014 his boss says he\u2019s the human version of \u201Cit\u2019s fine.\u201D",
+        "His guiding philosophy: keep the big things big and the little things little."
+      ]
+    },
+    // {
+    //   name: "Next Person",
+    //   facts: [
+    //     "Fact one.",
+    //     "Fact two.",
+    //   ]
+    // },
+  ];
+
+  // Flatten and shuffle
+  let pool = [];
+  teamMembers.forEach(m => m.facts.forEach(f => pool.push({ name: m.name, text: f })));
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  pool = shuffleArray([...pool]);
+  let idx = 0;
+
+  const body = document.getElementById('cardBody');
+  const nameEl = document.getElementById('factName');
+  const textEl = document.getElementById('factText');
+  const dotsEl = document.getElementById('dots');
+
+  function buildDots() {
+    dotsEl.innerHTML = '';
+    const cap = Math.min(pool.length, 10);
+    for (let i = 0; i < cap; i++) {
+      const d = document.createElement('span');
+      d.className = 'dot' + (i === idx % cap ? ' active' : '');
+      dotsEl.appendChild(d);
+    }
+  }
+
+  function show() {
+    nameEl.textContent = pool[idx].name;
+    textEl.textContent = pool[idx].text;
+    buildDots();
+  }
+
+  function shuffle() {
+    body.classList.add('fading');
+    setTimeout(() => {
+      idx = (idx + 1) % pool.length;
+      if (idx === 0) pool = shuffleArray([...pool]);
+      show();
+      body.classList.remove('fading');
+    }, 300);
+  }
+
+  show();
+</script>
+
+</body>
+</html>
